@@ -70,7 +70,7 @@ function setupPage() {
 
 
 function apiJson(data,status){return new Response(JSON.stringify(data),{status:status||200,headers:{"content-type":"application/json; charset=UTF-8"}});}
-function safeNotePath(v){if(typeof v!=="string")return null;const p=v.replace(/^\\/+/"");return p.startsWith("src/site/notes/")&&p.endsWith(".md")&&!p.includes("..")?p:null;}
+function safeNotePath(v){if(typeof v!=="string")return null;const p=v.replace(/^\/+/, "");return p.startsWith("src/site/notes/")&&p.endsWith(".md")&&!p.includes("..")?p:null;}
 function ghPath(p){return p.split("/").map(encodeURIComponent).join("/");}
 async function gh(path,env,opt){if(!env.GITHUB_TOKEN)return null;return fetch("https://api.github.com"+path,{...(opt||{}),headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+env.GITHUB_TOKEN,"X-GitHub-Api-Version":"2022-11-28",...((opt&&opt.headers)||{})}});}
 function fromB64(v){const b=Uint8Array.from(atob(v.replace(/\\n/g,"")),c=>c.charCodeAt(0));return new TextDecoder().decode(b);}
