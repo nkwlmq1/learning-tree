@@ -23,6 +23,7 @@
         <h1>{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %}</h1>
       {% endif %}
 
+      <a class="dg-edit-note" href="https://github.com/nkwlmq1/learning-tree/edit/main/{{ githubEditPath }}" target="_blank" rel="noopener" style="display:inline-block;margin:12px 0 4px;padding:7px 12px;border:1px solid currentColor;border-radius:6px;text-decoration:none;">✎ 编辑此笔记</a>
       <div class="header-meta">
         {% if settings.dgShowTags === true and tags %}
           <div class="header-tags">
