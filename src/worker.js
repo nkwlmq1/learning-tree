@@ -86,9 +86,46 @@ list().then(function(){say("可以编辑")}).catch(function(e){say(e.message)});
 </script></body></html>`,{headers:{"content-type":"text/html; charset=UTF-8"}});}
 async function editorApi(req,env,url){if(!env.GITHUB_TOKEN)return apiJson({error:"GITHUB_TOKEN 尚未设置"},503);const repo="nkwlmq1/learning-tree";if(url.pathname==="/__api/notes"){const r=await gh("/repos/"+repo+"/git/trees/main?recursive=1",env);if(!r||!r.ok)return apiJson({error:"无法读取 GitHub 笔记"},502);const t=await r.json();return apiJson({notes:(t.tree||[]).filter(function(x){return x.type==="blob"&&safeNotePath(x.path)}).map(function(x){return {path:x.path,sha:x.sha}})})}if(url.pathname==="/__api/note"&&req.method==="GET"){const p=safeNotePath(url.searchParams.get("path"));if(!p)return apiJson({error:"笔记路径无效"},400);const r=await gh("/repos/"+repo+"/contents/"+ghPath(p)+"?ref=main",env);if(!r||!r.ok)return apiJson({error:"无法读取笔记"},404);const d=await r.json();return apiJson({path:p,sha:d.sha,content:fromB64(d.content||"")})}if(url.pathname==="/__api/note"&&req.method==="PUT"){const b=await req.json(),p=safeNotePath(b.path),old=safeNotePath(b.oldPath||"");if(!p||(b.oldPath&&!old))return apiJson({error:"笔记路径无效"},400);const data={message:String(b.message||"Edit note from Digital Garden"),content:toB64(String(b.content||"")),branch:"main"};if(old===p){const r=await gh("/repos/"+repo+"/contents/"+ghPath(p)+"?ref=main",env);if(r&&r.ok)data.sha=(await r.json()).sha}const r=await gh("/repos/"+repo+"/contents/"+ghPath(p),env,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(data)});if(!r||!r.ok)return apiJson({error:"GitHub 保存失败"},502);if(old&&old!==p){const q=await gh("/repos/"+repo+"/contents/"+ghPath(old)+"?ref=main",env);if(q&&q.ok){const d=await q.json();await gh("/repos/"+repo+"/contents/"+ghPath(old),env,{method:"DELETE",headers:{"content-type":"application/json"},body:JSON.stringify({message:"Move note from Digital Garden",sha:d.sha,branch:"main"})})}}return apiJson({ok:true,path:p})}return apiJson({error:"Not found"},404)}
 
+
+function localEditorPage() {
+  return new Response(`<!doctype html><html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>编辑 Digital Garden</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#202634;color:#edf0f5;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+header{position:sticky;top:0;padding:16px;background:#282f3e;border-bottom:1px solid #414b5d}h1{margin:0 0 12px;font-size:20px}
+button,input,textarea{font:inherit;border-radius:8px;border:1px solid #4b566b;background:#171c27;color:#fff}button{padding:10px 14px;background:#8b7cff;border:0;margin-right:8px}button.secondary{background:#3a4456}
+input{padding:10px;width:100%}main{max-width:900px;margin:auto;padding:16px}.panel{background:#282f3e;border:1px solid #414b5d;border-radius:12px;padding:14px}textarea{width:100%;min-height:65vh;padding:14px;line-height:1.6;resize:vertical}label{display:block;margin:10px 0 6px;color:#aeb5c2}#status{margin-top:10px;color:#aeb5c2}
+</style></head><body><header><h1>编辑 Digital Garden</h1>
+<button id="save">保存到本机</button><button id="download" class="secondary">导出 Markdown</button><button class="secondary" onclick="location.href='/'">返回网页</button>
+<div id="status">当前为本地编辑测试，不会改动云端数据。</div></header>
+<main><section class="panel"><label>笔记路径（可用于测试分类/目录）</label><input id="path" value="src/site/notes/04-新笔记.md">
+<label>Markdown 内容</label><textarea id="content">---
+title: 新笔记
+dg-publish: true
+tags:
+  - learning-tree
+---
+
+# 新笔记
+
+在这里编辑内容。
+</textarea></section></main>
+<script>
+const path=document.getElementById("path"),content=document.getElementById("content"),status=document.getElementById("status"),key="digitalgarden-local-draft";
+const saved=localStorage.getItem(key);if(saved){try{const d=JSON.parse(saved);path.value=d.path||path.value;content.value=d.content||content.value;status.textContent="已载入本机草稿。"}catch{}}
+document.getElementById("save").onclick=()=>{localStorage.setItem(key,JSON.stringify({path:path.value,content:content.value}));status.textContent="已保存到本机；尚未连接云端数据。"};
+document.getElementById("download").onclick=()=>{const blob=new Blob([content.value],{type:"text/markdown;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(path.value.split("/").pop()||"note.md");a.click();URL.revokeObjectURL(a.href)};
+</script></body></html>`, {headers:{"content-type":"text/html; charset=UTF-8"}});
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/__editor") {
+      return localEditorPage();
+    }
 
     if (url.pathname === "/__editor") {
       const expected = env.SITE_PASSWORD ? await signSession(env.SITE_PASSWORD) : null;
