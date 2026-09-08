@@ -12,9 +12,9 @@ dg-publish: true
 
 ## 学习方向
 
-- [[01-装修材料学习]]
-- [[02-室内设计学习]]
-- [[03-英语学习]]
+- [装修材料学习](/notes/renovation/)
+- [室内设计学习](/notes/interior-design/)
+- [英语学习](/notes/english/)
 
 ## 当前原则
 
