@@ -5,15 +5,21 @@ body {
    */
     --font-text-theme: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
     --font-interface-theme: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
-    font-family: var(--font-text-theme);
+    --font-text: var(--font-text-theme) !important;
+    --font-interface: var(--font-interface-theme) !important;
+    font-family: var(--font-text-theme) !important;
 }
 
 body,
 button,
 input,
 textarea,
-select {
-    font-family: var(--font-interface-theme);
+select,
+.content,
+.markdown-preview-view,
+.filetree-sidebar,
+.sidebar {
+    font-family: var(--font-interface-theme) !important;
 }
 
 .content {
@@ -22,6 +28,6 @@ select {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-text-theme);
+    font-family: var(--font-text-theme) !important;
     font-weight: 600;
 }
