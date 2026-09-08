@@ -163,16 +163,23 @@ function renderGraph(graphData, containerId, isFullScreen) {
         .force('collide', forceCollide(d => nodeRadius(d.id, degreeMap) + 1).iterations(3))
         .force('radial', forceRadial(radius, width / 2, height / 2).strength(0.05));
 
-    // Pixi v7 Application (synchronous constructor)
-    const app = new Application({
-        width,
-        height,
-        antialias: true,
-        autoStart: false,
-        autoDensity: true,
-        backgroundAlpha: 0,
-        resolution: window.devicePixelRatio,
-    });
+    // Pixi may not have a usable WebGL/canvas renderer on mobile Safari.
+    // The graph is optional; never let it prevent the rest of the page from rendering.
+    let app;
+    try {
+        app = new Application({
+            width,
+            height,
+            antialias: true,
+            autoStart: false,
+            autoDensity: true,
+            backgroundAlpha: 0,
+            resolution: window.devicePixelRatio,
+        });
+    } catch (error) {
+        console.warn('Connected Pages graph unavailable; continuing without graph.', error);
+        return null;
+    }
     el.appendChild(app.view);
 
     const stage = app.stage;
@@ -507,7 +514,9 @@ document.addEventListener('forestry:css-changed', function() {
     if (graphDataCache) renderLocal();
 });
 
-init();
+init().catch(error => {
+    console.warn('Connected Pages graph unavailable; continuing without graph.', error);
+});
 </script>
 
 <div id="graph-component" class="graph" x-data="{ showFullGraph: false, graphDepth: 1 }">
