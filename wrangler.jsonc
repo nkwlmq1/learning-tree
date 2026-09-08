@@ -1,8 +1,10 @@
 {
-  "name": "learning-tree",
+  "name": "digitalgarden",
+  "main": "src/worker.js",
   "compatibility_date": "2026-09-08",
   "assets": {
     "directory": "./dist/",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
   }
