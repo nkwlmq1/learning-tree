@@ -25,6 +25,10 @@ module.exports = {
       }
       return data.permalink || undefined;
     },
+    githubEditPath: (data) => {
+      const inputPath = data.page.inputPath || "";
+      return inputPath.replace(/^\.\//, "");
+    },
     basesNotes: (data) => {
       if (!data.collections || !data.collections.note) return [];
       return data.collections.note.map((item) => ({
