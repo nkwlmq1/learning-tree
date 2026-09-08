@@ -25,7 +25,7 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
     <main class="content cm-s-obsidian print {{contentClasses}}">
       <header>
         {% if settings.dgShowInlineTitle === true %}
-          <h1 data-note-icon="{% if noteIcon %}{{noteIcon}}{% else %}{{meta.noteIconsSettings.default}}{% endif %}">{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %}</h1>
+          <h1 data-note-icon="{% if noteIcon %}{{noteIcon}}{% else %}{{meta.noteIconsSettings.default}}{% endif %}">{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %} <a class="dg-title-edit" href="https://github.com/nkwlmq1/learning-tree/edit/main/{{ githubEditPath }}" target="_blank" rel="noopener" style="font-size:.55em;margin-left:.5em;vertical-align:middle;text-decoration:none;">✎ 编辑</a></h1>
         {% endif %}
         <a class="dg-edit-note" href="https://github.com/nkwlmq1/learning-tree/edit/main/{{ githubEditPath }}" target="_blank" rel="noopener" style="display:inline-block;margin:12px 0 4px;padding:7px 12px;border:1px solid currentColor;border-radius:6px;text-decoration:none;">✎ 编辑此笔记</a>
       <div class="header-meta">
