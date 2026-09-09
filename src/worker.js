@@ -58,7 +58,12 @@ function notePath(value) {
   const path = value.replace(/^\/+/, "");
   return /^src\/site\/notes\/[A-Za-z0-9._\-\/\u0080-\uffff]+\.md$/.test(path) && !path.includes("..") ? path : null;
 }
-function assetPath(value) {\n  if (typeof value !== "string") return null;\n  const path = value.replace(/^\\/+/, "");\n  return /^src\\/site\\/img\\/[A-Za-z0-9._\\-\\/\\u0080-\\uffff]+$/.test(path) && !path.includes("..") ? path : null;\n}\nfunction ghPath(path) { return path.split("/").map(encodeURIComponent).join("/"); }
+function assetPath(value) {
+  if (typeof value !== "string") return null;
+  const path = value.replace(/^\/+/, "");
+  return /^src\/site\/img\/[A-Za-z0-9._\-\/\u0080-\uffff]+$/.test(path) && !path.includes("..") ? path : null;
+}
+function ghPath(path) { return path.split("/").map(encodeURIComponent).join("/"); }
 async function gh(path, token, options) {
   if (!token) return null;
   return fetch("https://api.github.com" + path, { ...(options || {}), headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + token, "X-GitHub-Api-Version": "2022-11-28", ...((options && options.headers) || {}) } });
