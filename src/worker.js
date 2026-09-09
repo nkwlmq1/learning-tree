@@ -66,6 +66,12 @@ function toB64(value) {
   return btoa(text);
 }
 async function currentSession(request, env) { return unseal(cookie(request, SESSION_COOKIE), settings(env).sessionSecret); }
+async function assets(request, env) {
+  const url = new URL(request.url);
+  if (url.pathname === "/") url.pathname = "/index.html";
+  else if (url.pathname.endsWith("/")) url.pathname += "index.html";
+  return env.ASSETS.fetch(new Request(url, request));
+}
 async function api(request, env, url, user) {
   const cfg = settings(env), token = user.token;
   if (url.pathname === "/__api/notes" && request.method === "GET") {
@@ -140,9 +146,9 @@ export default {
     if (url.pathname === "/__oauth/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": setCookie(SESSION_COOKIE, "", 0) } });
     const user = await currentSession(request, env);
     if (url.pathname === "/__editor") return Response.redirect(new URL("/editor.html" + (url.search || ""), request.url), 302);
-    if (url.pathname === "/editor.html") return env.ASSETS.fetch(request);
+    if (url.pathname === "/editor.html") return assets(request, env);
     if (url.pathname === "/__api/session" && request.method === "GET") return json({ authenticated: Boolean(user), user: user ? { login: user.login } : null });
     if (url.pathname.startsWith("/__api/")) return user ? api(request, env, url, user) : json({ error: "GitHub 登录后才能编辑" }, 401);
-    return env.ASSETS.fetch(request);
+    return assets(request, env);
   }
 };
