@@ -32,5 +32,23 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
 }
 
+.dg-inline-editor-overlay { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 1.5rem; background: rgba(8, 12, 18, .72); backdrop-filter: blur(8px); }
+.dg-inline-editor { width: min(1100px, 100%); max-height: min(900px, 94vh); overflow: auto; padding: 1.4rem; border: 1px solid var(--background-modifier-border); border-radius: 14px; background: var(--background-primary); color: var(--text-normal); box-shadow: 0 24px 80px rgba(0,0,0,.42); }
+.dg-inline-editor header, .dg-inline-editor footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.dg-inline-editor h2 { margin: .15rem 0 .8rem; }
+.dg-inline-editor-kicker { color: var(--text-muted); font-size: .72rem; letter-spacing: .12em; }
+.dg-inline-editor-close { background: transparent; color: var(--text-muted); font-size: 1.7rem; line-height: 1; border: 0; cursor: pointer; }
+.dg-inline-editor-status { color: var(--text-muted); min-height: 1.4em; }
+.dg-inline-editor-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem 1rem; }
+.dg-inline-editor label { display: grid; gap: .35rem; font-weight: 600; }
+.dg-inline-editor input, .dg-inline-editor textarea { width: 100%; box-sizing: border-box; padding: .7rem .75rem; border: 1px solid var(--background-modifier-border); border-radius: 7px; background: var(--background-secondary); color: var(--text-normal); font: inherit; }
+.dg-inline-editor-body { margin-top: 1rem; }
+.dg-inline-editor textarea { min-height: 46vh; resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; line-height: 1.55; }
+.dg-inline-editor footer { justify-content: flex-end; margin-top: 1rem; }
+.dg-inline-editor footer button { padding: .65rem .95rem; border: 0; border-radius: 7px; cursor: pointer; }
+.dg-inline-editor-cancel { background: var(--background-modifier-border); color: var(--text-normal); }
+.dg-inline-editor-save { background: var(--interactive-accent); color: var(--text-on-accent); }
+@media (max-width: 700px) { .dg-inline-editor-overlay { padding: .5rem; } .dg-inline-editor-fields { grid-template-columns: 1fr; } }
+
 .dg-title-edit { font-size: .55em; margin-left: .5em; vertical-align: middle; text-decoration: none; }
 .dg-edit-note { display: inline-block; margin: 12px 0 4px; padding: 7px 12px; border: 1px solid currentColor; border-radius: 6px; text-decoration: none; }

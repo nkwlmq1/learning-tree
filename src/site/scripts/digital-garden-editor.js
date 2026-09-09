@@ -17,9 +17,9 @@
     Object.entries(values).forEach(([key, value]) => {
       const line = key + ": " + JSON.stringify(value || "");
       const expression = new RegExp("^" + key + ":.*$", "m");
-      yaml = expression.test(yaml) ? yaml.replace(expression, line) : yaml + (yaml && !yaml.endsWith("\\n") ? "\\n" : "") + line + "\\n";
+      yaml = expression.test(yaml) ? yaml.replace(expression, line) : yaml + (yaml && !yaml.endsWith("\n") ? "\n" : "") + line + "\n";
     });
-    return "---\\n" + yaml.trim() + "\\n---\\n\\n" + body.replace(/^\\n+/, "");
+    return "---\n" + yaml.trim() + "\n---\n\n" + body.replace(/^\n+/, "");
   }
   async function request(url, options) {
     const response = await fetch(url, options);
@@ -59,7 +59,7 @@
     $("dg-title").value = "新笔记";
     $("dg-category").value = "";
     $("dg-directory").value = "";
-    $("dg-content").value = "---\\ntitle: 新笔记\\ndg-publish: true\\ntags:\\n  - learning-tree\\n---\\n\\n# 新笔记\\n\\n";
+    $("dg-content").value = "---\ntitle: 新笔记\ndg-publish: true\ntags:\n  - learning-tree\n---\n\n# 新笔记\n\n";
     status("已准备新笔记");
   });
   $("dg-save").addEventListener("click", async () => {

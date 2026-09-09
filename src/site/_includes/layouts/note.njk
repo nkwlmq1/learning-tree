@@ -25,9 +25,9 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
     <main class="content cm-s-obsidian print {{contentClasses}}">
       <header>
         {% if settings.dgShowInlineTitle === true %}
-          <h1 data-note-icon="{% if noteIcon %}{{noteIcon}}{% else %}{{meta.noteIconsSettings.default}}{% endif %}">{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %} <a class="dg-title-edit" href="/__editor?path={{ githubEditPath | urlencode }}" aria-label="编辑此笔记">✎ 编辑</a></h1>
+          <h1 data-note-icon="{% if noteIcon %}{{noteIcon}}{% else %}{{meta.noteIconsSettings.default}}{% endif %}">{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %} <a class="dg-title-edit" data-editor-path="{{ githubEditPath }}" href="/__editor?path={{ githubEditPath | urlencode }}" aria-label="编辑此笔记">✎ 编辑</a></h1>
         {% endif %}
-        <a class="dg-edit-note" href="/__editor?path={{ githubEditPath | urlencode }}">✎ 编辑此笔记</a>
+        <a class="dg-edit-note" data-editor-path="{{ githubEditPath }}" href="/__editor?path={{ githubEditPath | urlencode }}">✎ 编辑此笔记</a>
       <div class="header-meta">
           {% if settings.dgShowTags === true and tags %}
             <div class="header-tags">
@@ -88,5 +88,6 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
     {% endif %}
     {% include "components/basesScript.njk" %}
     {% include "components/excalidrawScript.njk" %}
+    <script src="/scripts/digital-garden-inline-editor.js?v=1"></script>
   </body>
 </html>

@@ -106,29 +106,42 @@ async function api(request, env, url, user) {
   return json({ error: "Not found" }, 404);
 }
 
+function redirectWithCookies(location, cookies) {
+  const headers = new Headers({ Location: location });
+  cookies.forEach(value => headers.append("Set-Cookie", value));
+  return new Response(null, { status: 302, headers });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url), cfg = settings(env);
     if (url.pathname === "/__oauth/start") {
       if (!cfg.clientId || !cfg.redirect || !cfg.sessionSecret) return text("GitHub OAuth 尚未配置。", 503);
-      const state = crypto.randomUUID(), target = new URL("https://github.com/login/oauth/authorize");
+      const state = crypto.randomUUID(), nonce = crypto.randomUUID(), target = new URL("https://github.com/login/oauth/authorize");
+      const returnTo = url.searchParams.get("return") || "/__editor";
+      const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/__editor";
       target.searchParams.set("client_id", cfg.clientId); target.searchParams.set("redirect_uri", cfg.redirect); target.searchParams.set("scope", "repo"); target.searchParams.set("state", state);
-      return new Response(null, { status: 302, headers: { Location: target.toString(), "Set-Cookie": setCookie(STATE_COOKIE, state, 600) } });
+      const stateCookie = await seal({ state, nonce, returnTo: safeReturn, exp: Math.floor(Date.now() / 1000) + 600 }, cfg.sessionSecret);
+      return redirectWithCookies(target.toString(), [setCookie(STATE_COOKIE, stateCookie, 600)]);
     }
     if (url.pathname === "/__oauth/callback") {
       if (!cfg.clientId || !cfg.clientSecret || !cfg.redirect || !cfg.sessionSecret) return text("GitHub OAuth 尚未完整配置。", 503);
-      if (!url.searchParams.get("code") || url.searchParams.get("state") !== cookie(request, STATE_COOKIE)) return text("OAuth state 校验失败。", 400);
+      const stateData = await unseal(cookie(request, STATE_COOKIE), cfg.sessionSecret);
+      if (!url.searchParams.get("code") || !stateData || stateData.exp < Math.floor(Date.now() / 1000) || url.searchParams.get("state") !== stateData.state || !stateData.nonce) return text("OAuth state/nonce 校验失败。", 400);
       const tokenResponse = await fetch("https://github.com/login/oauth/access_token", { method: "POST", headers: { Accept: "application/json", "content-type": "application/json" }, body: JSON.stringify({ client_id: cfg.clientId, client_secret: cfg.clientSecret, code: url.searchParams.get("code"), redirect_uri: cfg.redirect }) });
+      if (!tokenResponse.ok) return text("GitHub OAuth 授权失败。", 502);
       const token = (await tokenResponse.json()).access_token;
       if (!token) return text("GitHub OAuth 授权失败。", 502);
       const profileResponse = await gh("/user", token);
       if (!profileResponse?.ok) return text("无法确认 GitHub 用户。", 502);
-      const profile = await profileResponse.json(), value = await seal({ token, login: profile.login, exp: Math.floor(Date.now() / 1000) + SESSION_TTL }, cfg.sessionSecret);
-      return new Response(null, { status: 302, headers: { Location: "/__editor", "Set-Cookie": setCookie(SESSION_COOKIE, value, SESSION_TTL) + ", " + setCookie(STATE_COOKIE, "", 0) } });
+      const profile = await profileResponse.json(), value = await seal({ token, login: profile.login, nonce: stateData.nonce, exp: Math.floor(Date.now() / 1000) + SESSION_TTL }, cfg.sessionSecret);
+      return redirectWithCookies(stateData.returnTo || "/__editor", [setCookie(SESSION_COOKIE, value, SESSION_TTL), setCookie(STATE_COOKIE, "", 0)]);
     }
     if (url.pathname === "/__oauth/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": setCookie(SESSION_COOKIE, "", 0) } });
     const user = await currentSession(request, env);
     if (url.pathname === "/__editor") return Response.redirect(new URL("/editor.html" + (url.search || ""), request.url), 302);
+    if (url.pathname === "/editor.html") return env.ASSETS.fetch(request);
+    if (url.pathname === "/__api/session" && request.method === "GET") return json({ authenticated: Boolean(user), user: user ? { login: user.login } : null });
     if (url.pathname.startsWith("/__api/")) return user ? api(request, env, url, user) : json({ error: "GitHub 登录后才能编辑" }, 401);
     return env.ASSETS.fetch(request);
   }

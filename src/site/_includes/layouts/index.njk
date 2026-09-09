@@ -20,10 +20,10 @@
     <main class="content cm-s-obsidian print {{contentClasses}}">
       <header>
       {% if settings.dgShowInlineTitle === true %}
-        <h1>{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %} <a class="dg-title-edit" href="/__editor{% if githubEditPath %}?path={{ githubEditPath | urlencode }}{% endif %}" aria-label="编辑主页">✎ 编辑</a></h1>
+        <h1>{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %} <a class="dg-title-edit" data-editor-path="{{ githubEditPath }}" href="/__editor?path={{ githubEditPath | urlencode }}" aria-label="编辑主页">✎ 编辑</a></h1>
       {% endif %}
 
-      <a class="dg-edit-note" href="/__editor{% if githubEditPath %}?path={{ githubEditPath | urlencode }}{% endif %}">✎ 编辑此页</a>
+      <a class="dg-edit-note" data-editor-path="{{ githubEditPath }}" href="/__editor?path={{ githubEditPath | urlencode }}">✎ 编辑此页</a>
       <div class="header-meta">
         {% if settings.dgShowTags === true and tags %}
           <div class="header-tags">
@@ -80,5 +80,6 @@
     {%include "components/lucideIcons.njk"%}
     {%include "components/basesScript.njk"%}
     {%include "components/excalidrawScript.njk"%}
+    <script src="/scripts/digital-garden-inline-editor.js?v=1"></script>
     </body>
   </html>
