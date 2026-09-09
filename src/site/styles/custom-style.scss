@@ -31,3 +31,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-text-theme) !important;
     font-weight: 600;
 }
+
+.dg-title-edit { font-size: .55em; margin-left: .5em; vertical-align: middle; text-decoration: none; }
+.dg-edit-note { display: inline-block; margin: 12px 0 4px; padding: 7px 12px; border: 1px solid currentColor; border-radius: 6px; text-decoration: none; }
