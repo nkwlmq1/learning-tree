@@ -32,6 +32,10 @@ module.exports = {
   permalink: hasHomePage ? false : "/",
   eleventyComputed: {
     title: (data) => (data.meta && data.meta.siteName) || "Notes",
+    githubEditPath: (data) => {
+      const inputPath = data.page && data.page.inputPath || "";
+      return inputPath.replace(/^\.\//, "");
+    },
     // Notes get their per-page settings from notes/notes.11tydata.js; this
     // page has no frontmatter to override with, so the env defaults apply.
     settings: () => {
