@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>编辑 Digital Garden</title>
+  <link rel="stylesheet" href="/styles/style.css">
+  <style>
+    .dg-editor { max-width: 1080px; margin: 0 auto; padding: 2rem 1rem; }
+    .dg-editor-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1rem; }
+    .dg-editor-panel { padding: 1rem; border: 1px solid var(--background-modifier-border); border-radius: 10px; background: var(--background-secondary); }
+    .dg-editor label { display: block; margin: .8rem 0 .3rem; font-weight: 600; }
+    .dg-editor input, .dg-editor select, .dg-editor textarea { width: 100%; box-sizing: border-box; padding: .65rem; border: 1px solid var(--background-modifier-border); border-radius: 6px; background: var(--background-primary); color: var(--text-normal); }
+    .dg-editor textarea { min-height: 62vh; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; line-height: 1.55; }
+    .dg-editor-toolbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; }
+    .dg-editor button, .dg-editor a { padding: .6rem .9rem; border: 0; border-radius: 6px; cursor: pointer; text-decoration: none; }
+    .dg-editor button.primary, .dg-editor a.primary { background: var(--interactive-accent); color: var(--text-on-accent); }
+    .dg-editor button.secondary, .dg-editor a.secondary { background: var(--background-modifier-border); color: var(--text-normal); }
+    #dg-editor-status { color: var(--text-muted); }
+    @media (max-width: 700px) { .dg-editor-grid { grid-template-columns: 1fr; } .dg-editor textarea { min-height: 50vh; } }
+  </style>
+</head>
+<body>
+  <main class="dg-editor">
+    <h1>编辑 Digital Garden</h1>
+    <div class="dg-editor-toolbar">
+      <button id="dg-new" class="secondary">新建笔记</button>
+      <button id="dg-save" class="primary">保存并发布</button>
+      <a class="secondary" href="/">返回网页</a>
+      <span id="dg-editor-auth"></span>
+    </div>
+    <p id="dg-editor-status">正在检查 GitHub 登录状态…</p>
+    <div class="dg-editor-grid">
+      <section class="dg-editor-panel">
+        <label for="dg-files">现有笔记</label>
+        <select id="dg-files"></select>
+        <label for="dg-path">笔记路径</label>
+        <input id="dg-path" placeholder="src/site/notes/新笔记.md">
+        <label for="dg-title">标题</label>
+        <input id="dg-title">
+        <label for="dg-category">分类</label>
+        <input id="dg-category" placeholder="例如：室内设计">
+        <label for="dg-directory">主目录</label>
+        <input id="dg-directory" placeholder="例如：02-室内设计学习">
+        <label for="dg-message">提交说明</label>
+        <input id="dg-message" value="Edit note from Digital Garden">
+      </section>
+      <section class="dg-editor-panel">
+        <label for="dg-content">Markdown 正文与 frontmatter</label>
+        <textarea id="dg-content" spellcheck="false"></textarea>
+      </section>
+    </div>
+  </main>
+  <script src="/scripts/digital-garden-editor.js"></script>
+</body>
+</html>
