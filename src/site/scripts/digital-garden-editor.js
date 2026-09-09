@@ -48,7 +48,7 @@
   async function init() {
     const auth = await request("/api/session");
     user = auth.user;
-    $("dg-editor-auth").innerHTML = "<span>GitHub：" + user.login + "</span> · <a href=\"/oauth/logout\">退出</a>";
+    $("dg-editor-auth").innerHTML = "<span>GitHub：" + user.login + "</span> · <a href=\"/logout\">退出</a>";
     await listNotes();
     status("可以编辑");
   }
@@ -74,6 +74,6 @@
     status("已写回 GitHub；Cloudflare 将在构建后更新页面");
     await listNotes();
   });
-  $("dg-editor-auth").innerHTML = "<a class=\"primary\" href=\"/oauth/start\">使用 GitHub 登录后编辑</a>";
+  $("dg-editor-auth").innerHTML = "<a class=\"primary\" href=\"/login\">使用 GitHub 登录后编辑</a>";
   request("/api/session").then(init).catch(() => status("请先使用 GitHub 登录后编辑"));
 })();

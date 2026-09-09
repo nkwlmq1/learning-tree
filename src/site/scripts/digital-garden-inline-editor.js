@@ -29,9 +29,9 @@
 
   async function open(path) {
     let session;
-    try { session = await request("/api/session"); } catch (error) { window.location.href = "/oauth/start?return=" + encodeURIComponent(location.pathname + location.search); return; }
+    try { session = await request("/api/session"); } catch (error) { window.location.href = "/login?return=" + encodeURIComponent(location.pathname + location.search); return; }
     if (!session.authenticated) {
-      window.location.href = "/oauth/start?return=" + encodeURIComponent(location.pathname + location.search);
+      window.location.href = "/login?return=" + encodeURIComponent(location.pathname + location.search);
       return;
     }
     const overlay = document.createElement("div");
