@@ -47,7 +47,11 @@ async function unseal(value, secret) {
 function settings(env) {
   const repo = env.GITHUB_REPOSITORY || "nkwlmq1/learning-tree";
   const parts = repo.split("/");
-  return { owner: parts[0], repo: parts[1], branch: env.GITHUB_BRANCH || "main", clientId: env.GITHUB_CLIENT_ID, clientSecret: env.GITHUB_CLIENT_SECRET, redirect: env.GITHUB_OAUTH_REDIRECT_URI, sessionSecret: env.SESSION_SECRET };
+  const configuredRedirect = env.GITHUB_OAUTH_REDIRECT_URI || "";
+  const redirect = configuredRedirect.endsWith("/login/callback") || configuredRedirect.endsWith("/oauth/callback") || configuredRedirect.endsWith("/__oauth/callback")
+    ? configuredRedirect.replace(/\/login\/callback$|\/oauth\/callback$|\/__oauth\/callback$/, "/login/return")
+    : configuredRedirect;
+  return { owner: parts[0], repo: parts[1], branch: env.GITHUB_BRANCH || "main", clientId: env.GITHUB_CLIENT_ID, clientSecret: env.GITHUB_CLIENT_SECRET, redirect, sessionSecret: env.SESSION_SECRET };
 }
 function notePath(value) {
   if (typeof value !== "string") return null;
