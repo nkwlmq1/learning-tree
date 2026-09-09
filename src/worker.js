@@ -58,7 +58,7 @@ function notePath(value) {
   const path = value.replace(/^\/+/, "");
   return /^src\/site\/notes\/[A-Za-z0-9._\-\/\u0080-\uffff]+\.md$/.test(path) && !path.includes("..") ? path : null;
 }
-function ghPath(path) { return path.split("/").map(encodeURIComponent).join("/"); }
+function assetPath(value) {\n  if (typeof value !== "string") return null;\n  const path = value.replace(/^\\/+/, "");\n  return /^src\\/site\\/img\\/[A-Za-z0-9._\\-\\/\\u0080-\\uffff]+$/.test(path) && !path.includes("..") ? path : null;\n}\nfunction ghPath(path) { return path.split("/").map(encodeURIComponent).join("/"); }
 async function gh(path, token, options) {
   if (!token) return null;
   return fetch("https://api.github.com" + path, { ...(options || {}), headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + token, "X-GitHub-Api-Version": "2022-11-28", ...((options && options.headers) || {}) } });
@@ -92,6 +92,26 @@ async function api(request, env, url, user) {
     const data = await result.json();
     return json({ path, sha: data.sha, content: fromB64(data.content || "") });
   }
+  if (url.pathname === "/__api/asset" && request.method === "POST") {
+    const body = await request.json().catch(() => null);
+    const path = assetPath(body?.path);
+    const content = typeof body?.content === "string" ? body.content.replace(/^data:[^;]+;base64,/, "") : "";
+    if (!path || !content || content.length > 7000000 || !/^image\/(png|jpeg|gif|webp|svg\\+xml)$/.test(String(body?.mime || ""))) return json({ error: "图片路径、格式或大小无效" }, 400);
+    const saved = await gh("/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + ghPath(path), token, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: String(body.message || "Upload image from Digital Garden"), content, branch: cfg.branch }) });
+    if (!saved?.ok) return json({ error: "图片上传失败", detail: await saved.text() }, 502);
+    return json({ ok: true, path });
+  }
+  if (url.pathname === "/__api/note" && request.method === "DELETE") {
+    const body = await request.json().catch(() => null);
+    const path = notePath(body?.path);
+    if (!path) return json({ error: "笔记路径无效" }, 400);
+    const current = await gh("/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + ghPath(path) + "?ref=" + encodeURIComponent(cfg.branch), token);
+    if (!current?.ok) return json({ error: "无法读取当前文件版本" }, 409);
+    const currentData = await current.json();
+    const removed = await gh("/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + ghPath(path), token, { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: String(body.message || "Delete note from Digital Garden"), sha: currentData.sha, branch: cfg.branch }) });
+    if (!removed?.ok) return json({ error: "删除失败", detail: await removed.text() }, 502);
+    return json({ ok: true, path });
+  }
   if (url.pathname === "/__api/note" && request.method === "PUT") {
     const body = await request.json().catch(() => null);
     const path = notePath(body?.path), oldPath = body?.oldPath ? notePath(body.oldPath) : "";
@@ -104,13 +124,8 @@ async function api(request, env, url, user) {
     }
     const saved = await gh("/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + ghPath(path), token, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
     if (!saved?.ok) return json({ error: "GitHub 保存失败", detail: await saved.text() }, 502);
-    if (oldPath && oldPath !== path) {
-      const old = await gh("/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + ghPath(oldPath) + "?ref=" + encodeURIComponent(cfg.branch), token);
-      if (old?.ok) {
-        const oldData = await old.json();
-        await gh("/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + ghPath(oldPath), token, { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: "Move " + oldPath + " to " + path, sha: oldData.sha, branch: cfg.branch }) });
-      }
-    }
+    // Reclassification never deletes the previous note automatically.
+    // The explicit DELETE endpoint is only used after a user confirmation.
     return json({ ok: true, path });
   }
   return json({ error: "Not found" }, 404);
