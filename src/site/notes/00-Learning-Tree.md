@@ -28,4 +28,4 @@ dg-publish: true
 本网页使用原始 Obsidian Digital Garden 模板。  
 页面布局、导航、主题、搜索、文件树、图谱和反向链接均保持模板原样。
 
-[✎ 编辑此笔记](https://github.com/nkwlmq1/learning-tree/edit/main/src/site/notes/00-Learning-Tree.md)
+[✎ 在网页内编辑此笔记](/__editor?path=src%2Fsite%2Fnotes%2F00-Learning-Tree.md)
