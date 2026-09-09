@@ -81,7 +81,8 @@
     await listNotes();
     status("可以编辑");
   }
-  $("dg-upload").addEventListener("click", () => uploadImage());\n  $("dg-delete").addEventListener("click", () => deleteCurrentNote());\n  $("dg-files").addEventListener("change", () => openNote(decodeURIComponent($("dg-files").value)).catch(error => status(error.message)));
+  $("dg-upload").addEventListener("click", () => uploadImage());
+  $("dg-delete").addEventListener("click", () => deleteCurrentNote());\n  $("dg-files").addEventListener("change", () => openNote(decodeURIComponent($("dg-files").value)).catch(error => status(error.message)));
   $("dg-new").addEventListener("click", () => {
     oldPath = "";
     $("dg-path").value = "src/site/notes/新笔记.md";
