@@ -121,16 +121,16 @@ function redirectWithCookies(location, cookies) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url), cfg = settings(env);
-    if (url.pathname === "/__oauth/start") {
+    if (url.pathname === "/__oauth/start" || url.pathname === "/oauth/start") {
       if (!cfg.clientId || !cfg.redirect || !cfg.sessionSecret) return text("GitHub OAuth 尚未配置。", 503);
       const state = crypto.randomUUID(), nonce = crypto.randomUUID(), target = new URL("https://github.com/login/oauth/authorize");
-      const returnTo = url.searchParams.get("return") || "/__editor";
-      const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/__editor";
+      const returnTo = url.searchParams.get("return") || "/editor.html";
+      const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/editor.html";
       target.searchParams.set("client_id", cfg.clientId); target.searchParams.set("redirect_uri", cfg.redirect); target.searchParams.set("scope", "repo"); target.searchParams.set("state", state);
       const stateCookie = await seal({ state, nonce, returnTo: safeReturn, exp: Math.floor(Date.now() / 1000) + 600 }, cfg.sessionSecret);
       return redirectWithCookies(target.toString(), [setCookie(STATE_COOKIE, stateCookie, 600)]);
     }
-    if (url.pathname === "/__oauth/callback") {
+    if (url.pathname === "/__oauth/callback" || url.pathname === "/oauth/callback") {
       if (!cfg.clientId || !cfg.clientSecret || !cfg.redirect || !cfg.sessionSecret) return text("GitHub OAuth 尚未完整配置。", 503);
       const stateData = await unseal(cookie(request, STATE_COOKIE), cfg.sessionSecret);
       if (!url.searchParams.get("code") || !stateData || stateData.exp < Math.floor(Date.now() / 1000) || url.searchParams.get("state") !== stateData.state || !stateData.nonce) return text("OAuth state/nonce 校验失败。", 400);
@@ -141,13 +141,13 @@ export default {
       const profileResponse = await gh("/user", token);
       if (!profileResponse?.ok) return text("无法确认 GitHub 用户。", 502);
       const profile = await profileResponse.json(), value = await seal({ token, login: profile.login, nonce: stateData.nonce, exp: Math.floor(Date.now() / 1000) + SESSION_TTL }, cfg.sessionSecret);
-      return redirectWithCookies(stateData.returnTo || "/__editor", [setCookie(SESSION_COOKIE, value, SESSION_TTL), setCookie(STATE_COOKIE, "", 0)]);
+      return redirectWithCookies(stateData.returnTo || "/editor.html", [setCookie(SESSION_COOKIE, value, SESSION_TTL), setCookie(STATE_COOKIE, "", 0)]);
     }
-    if (url.pathname === "/__oauth/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": setCookie(SESSION_COOKIE, "", 0) } });
+    if (url.pathname === "/__oauth/logout" || url.pathname === "/oauth/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": setCookie(SESSION_COOKIE, "", 0) } });
     const user = await currentSession(request, env);
-    if (url.pathname === "/__editor") return Response.redirect(new URL("/editor.html" + (url.search || ""), request.url), 302);
+    if (url.pathname === "/__editor" || url.pathname === "/editor") return Response.redirect(new URL("/editor.html" + (url.search || ""), request.url), 302);
     if (url.pathname === "/editor.html") return assets(request, env);
-    if (url.pathname === "/__api/session" && request.method === "GET") return json({ authenticated: Boolean(user), user: user ? { login: user.login } : null });
+    if ((url.pathname === "/__api/session" || url.pathname === "/api/session") && request.method === "GET") return json({ authenticated: Boolean(user), user: user ? { login: user.login } : null });
     if (url.pathname.startsWith("/__api/")) return user ? api(request, env, url, user) : json({ error: "GitHub 登录后才能编辑" }, 401);
     return assets(request, env);
   }
