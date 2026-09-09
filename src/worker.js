@@ -130,7 +130,7 @@ export default {
       const stateCookie = await seal({ state, nonce, returnTo: safeReturn, exp: Math.floor(Date.now() / 1000) + 600 }, cfg.sessionSecret);
       return redirectWithCookies(target.toString(), [setCookie(STATE_COOKIE, stateCookie, 600)]);
     }
-    if (url.pathname === "/__oauth/callback" || url.pathname === "/oauth/callback" || url.pathname === "/login/callback") {
+    if (url.pathname === "/__oauth/callback" || url.pathname === "/oauth/callback" || url.pathname === "/login/callback" || url.pathname === "/login/return") {
       if (!cfg.clientId || !cfg.clientSecret || !cfg.redirect || !cfg.sessionSecret) return text("GitHub OAuth 尚未完整配置。", 503);
       const stateData = await unseal(cookie(request, STATE_COOKIE), cfg.sessionSecret);
       if (!url.searchParams.get("code") || !stateData || stateData.exp < Math.floor(Date.now() / 1000) || url.searchParams.get("state") !== stateData.state || !stateData.nonce) return text("OAuth state/nonce 校验失败。", 400);
