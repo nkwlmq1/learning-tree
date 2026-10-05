@@ -6,3 +6,5 @@ DOMAIN,meta-ohttp-config-prod.fastly-edge.com
 DOMAIN,meta-ohttp-relay-prod.fastly-edge.com
 DOMAIN-SUFFIX,facebook.com
 DOMAIN-SUFFIX,fbcdn.net
+DOMAIN-SUFFIX,meta.com
+DOMAIN-SUFFIX,meta.ai
